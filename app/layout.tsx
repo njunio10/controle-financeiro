@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Controle Financeiro Pessoal",
+  title: "Controle Financeiro Natan",
   description: "Sistema simples e funcional para controle de finanças pessoais",
-    generator: 'v0.dev'
+    generator: 'Financeiro Natan'
 }
 
 export default function RootLayout({
