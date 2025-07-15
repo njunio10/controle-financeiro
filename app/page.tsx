@@ -24,7 +24,10 @@ export default function LoginPage() {
     setError("")
 
     // Verificar credenciais
-    if (email === "natanaelfinanceiro@gmail.com" && password === "financeirorei10") {
+    if (
+      (email === "natanaelfinanceiro@gmail.com" && password === "financeirorei10") ||
+      (email === "teste@gmail.com" && password === "teste123")
+    ) {
       // Simular delay de login
       setTimeout(() => {
         localStorage.setItem("user", "authenticated")
