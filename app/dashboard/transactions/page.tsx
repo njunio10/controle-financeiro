@@ -8,6 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 import { ArrowLeft, Search, Filter, Trash2, Plus } from "lucide-react"
 import Link from "next/link"
 
@@ -228,7 +239,10 @@ export default function TransactionsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
                         <p className="font-medium truncate">{transaction.description}</p>
-                        <Badge variant={transaction.type === "income" ? "default" : "destructive"} className="w-fit">
+                        <Badge 
+                          variant={transaction.type === "income" ? "default" : "destructive"} 
+                          className={`w-fit ${transaction.type === "income" ? "bg-green-100 text-green-700 border-green-400" : "bg-red-100 text-red-700 border-red-400"}`}
+                        >
                           {transaction.type === "income" ? "Receita" : "Despesa"}
                         </Badge>
                       </div>
@@ -249,14 +263,29 @@ export default function TransactionsPage() {
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(transaction.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-black dark:text-foreground">Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription className="text-black dark:text-foreground">
+                              Tem certeza que deseja excluir esta transação? Essa ação não poderá ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="text-black dark:text-foreground">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(transaction.id)} className="bg-red-600 hover:bg-red-700">Excluir</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </div>

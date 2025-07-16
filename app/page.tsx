@@ -43,7 +43,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-primary rounded-full p-3">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
           </div>
           <CardTitle className="text-xl sm:text-2xl">Controle Financeiro</CardTitle>
