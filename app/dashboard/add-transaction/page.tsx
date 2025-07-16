@@ -96,10 +96,10 @@ export default function AddTransaction() {
                   <button
                     type="button"
                     onClick={() => setType("income")}
-                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${
+                    className={`p-4 border-2 rounded-lg transition-all duration-200 shadow-sm ${
                       type === "income"
-                        ? "border-green-500 bg-green-50 text-green-700"
-                        : "border-gray-200 bg-white text-gray-700 hover:border-green-300"
+                        ? "border-[hsl(var(--income))] bg-[hsl(var(--income)/0.15)] text-[hsl(var(--income))] dark:border-[hsl(var(--income))] dark:bg-[hsl(var(--income)/0.15)] dark:text-[hsl(var(--income))]"
+                        : "border-gray-200 bg-white text-gray-700 hover:border-[hsl(var(--income))] dark:border-[#333] dark:bg-card dark:text-[#bbbbbb] dark:hover:border-[hsl(var(--income))]"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -112,10 +112,10 @@ export default function AddTransaction() {
                   <button
                     type="button"
                     onClick={() => setType("expense")}
-                    className={`p-4 border-2 rounded-lg transition-all duration-200 ${
+                    className={`p-4 border-2 rounded-lg transition-all duration-200 shadow-sm ${
                       type === "expense"
-                        ? "border-red-500 bg-red-50 text-red-700"
-                        : "border-gray-200 bg-white text-gray-700 hover:border-red-300"
+                        ? "border-[hsl(var(--expense))] bg-[hsl(var(--expense)/0.15)] text-[hsl(var(--expense))] dark:border-[hsl(var(--expense))] dark:bg-[hsl(var(--expense)/0.15)] dark:text-[hsl(var(--expense))]"
+                        : "border-gray-200 bg-white text-gray-700 hover:border-[hsl(var(--expense))] dark:border-[#333] dark:bg-card dark:text-[#bbbbbb] dark:hover:border-[hsl(var(--expense))]"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -157,22 +157,16 @@ export default function AddTransaction() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  className={`${
-                    type === "income" ? "focus:border-green-500" : "focus:border-red-500"
-                  }`}
+                  className={`${type === "income" ? "focus:border-[hsl(var(--income))] dark:focus:border-[hsl(var(--income))]" : "focus:border-[hsl(var(--expense))] dark:focus:border-[hsl(var(--expense))]"}`}
                 />
               </div>
 
               {/* Botões */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button 
-                  type="submit" 
-                  className="flex-1" 
+                <Button
+                  type="submit"
+                  className={`flex-1 text-white dark:text-white border-2 shadow-sm ${type === "income" ? "bg-[hsl(var(--income))] border-[hsl(var(--income))] dark:bg-[hsl(var(--income))] dark:border-[hsl(var(--income))]" : "bg-[hsl(var(--expense))] border-[hsl(var(--expense))] dark:bg-[hsl(var(--expense))] dark:border-[hsl(var(--expense))]"}`}
                   disabled={isLoading}
-                  style={{
-                    backgroundColor: type === "income" ? "#10b981" : "#ef4444",
-                    borderColor: type === "income" ? "#10b981" : "#ef4444"
-                  }}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {isLoading ? "Salvando..." : "Salvar Transação"}

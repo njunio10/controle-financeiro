@@ -22,4 +22,22 @@ export async function deleteTransaction(id: string) {
     .delete()
     .eq('id', id)
   return { error }
+}
+
+export async function getTransactionById(id: string) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('id', id)
+    .single()
+  return { data, error }
+}
+
+export async function updateTransaction(id: string, updates: any) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .update(updates)
+    .eq('id', id)
+    .single()
+  return { data, error }
 } 

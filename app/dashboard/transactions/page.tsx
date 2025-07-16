@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { getTransactions, deleteTransaction } from '@/lib/transactionsApi'
+import { getTransactions, deleteTransaction, getTransactionById } from '@/lib/transactionsApi'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,9 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft, Search, Filter, Trash2, Plus } from "lucide-react"
+import { Pencil, ArrowDown, ArrowUp } from "lucide-react"
 import Link from "next/link"
+import TransactionForm from "./TransactionForm"
 
 interface Transaction {
   id: string
@@ -35,9 +37,13 @@ export default function TransactionsPage() {
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all")
-  const [monthFilter, setMonthFilter] = useState("all")
-  const [yearFilter, setYearFilter] = useState("all")
+  const [monthFilter, setMonthFilter] = useState(() => new Date().getMonth().toString())
+  const [yearFilter, setYearFilter] = useState(() => new Date().getFullYear().toString())
   const router = useRouter()
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editTransaction, setEditTransaction] = useState<any>(null)
+  const [editLoading, setEditLoading] = useState(false)
 
   useEffect(() => {
     const user = localStorage.getItem("user")
@@ -93,14 +99,21 @@ export default function TransactionsPage() {
   }, [transactions, searchTerm, typeFilter, monthFilter, yearFilter])
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta transação?")) {
-      deleteTransaction(id).then(({ error }) => {
-        if (!error) {
-          setTransactions(transactions.filter((t) => t.id !== id))
-          setFilteredTransactions(filteredTransactions.filter((t) => t.id !== id))
-        }
-      })
-    }
+    deleteTransaction(id).then(({ error }) => {
+      if (!error) {
+        setTransactions(transactions.filter((t) => t.id !== id))
+        setFilteredTransactions(filteredTransactions.filter((t) => t.id !== id))
+      }
+    })
+  }
+
+  // Função para abrir modal de edição
+  const handleEdit = async (id: string) => {
+    setEditLoading(true)
+    setIsEditModalOpen(true)
+    const { data } = await getTransactionById(id)
+    setEditTransaction(data)
+    setEditLoading(false)
   }
 
   const months = [
@@ -120,6 +133,19 @@ export default function TransactionsPage() {
 
   const years = Array.from(new Set(transactions.map((t) => new Date(t.date).getFullYear()))).sort((a, b) => b - a)
 
+  // Função para atualizar as transações após adicionar uma nova
+  const refreshTransactions = () => {
+    const email = localStorage.getItem("userEmail")
+    if (email) {
+      getTransactions(email).then(({ data, error }) => {
+        if (!error && data) {
+          setTransactions(data)
+          setFilteredTransactions(data)
+        }
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -135,12 +161,23 @@ export default function TransactionsPage() {
               </Link>
               <h1 className="text-xl font-semibold ml-4 text-black dark:text-foreground">Transações</h1>
             </div>
-            <Link href="/dashboard/add-transaction">
-              <Button size="sm" className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Transação
-              </Button>
-            </Link>
+            {/* Botão para abrir modal de nova transação */}
+            <Button size="sm" className="w-full sm:w-auto" onClick={() => setIsModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Transação
+            </Button>
+            {/* Modal de Nova Transação */}
+            <AlertDialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <AlertDialogContent className="max-w-lg w-full p-0">
+                <TransactionForm
+                  onSuccess={() => {
+                    setIsModalOpen(false)
+                    refreshTransactions()
+                  }}
+                  onCancel={() => setIsModalOpen(false)}
+                />
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </header>
@@ -215,7 +252,12 @@ export default function TransactionsPage() {
         {/* Lista de Transações */}
         <Card>
           <CardHeader>
-            <CardTitle>Transações ({filteredTransactions.length})</CardTitle>
+            <CardTitle>
+              Transações ({filteredTransactions.length})
+              <span className="ml-2 text-base font-normal text-gray-500">
+                ({months[parseInt(monthFilter)]} {yearFilter})
+              </span>
+            </CardTitle>
             <CardDescription>
               {filteredTransactions.length === 0
                 ? "Nenhuma transação encontrada com os filtros aplicados."
@@ -227,66 +269,64 @@ export default function TransactionsPage() {
               {filteredTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-gray-50 gap-4 sm:gap-0"
+                  className="flex flex-row items-center justify-between p-4 border rounded-xl shadow-sm bg-white dark:bg-card dark:border-border dark:shadow-lg"
                 >
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    <div
-                      className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                        transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-1">
-                        <p className="font-medium truncate">{transaction.description}</p>
-                        <Badge 
-                          variant={transaction.type === "income" ? "default" : "destructive"} 
-                          className={`w-fit ${transaction.type === "income" ? "bg-green-100 text-green-700 border-green-400" : "bg-red-100 text-red-700 border-red-400"}`}
-                        >
-                          {transaction.type === "income" ? "Receita" : "Despesa"}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        <span>{new Date(transaction.date).toLocaleDateString("pt-BR")}</span>
-                      </div>
+                  {/* Esquerda: Valor, ícone, badge, descrição, data */}
+                  <div className="flex flex-col items-start flex-1">
+                    <div className="flex items-center gap-2">
+                      {transaction.type === "income" ? (
+                        <ArrowUp className="h-5 w-5 text-[hsl(var(--income))]" />
+                      ) : (
+                        <ArrowDown className="h-5 w-5 text-[hsl(var(--expense))]" />
+                      )}
+                      <span className={`font-bold text-xl ${transaction.type === "income" ? "text-[hsl(var(--income))] dark:text-[hsl(var(--income))]" : "text-[hsl(var(--expense))] dark:text-[hsl(var(--expense))]"}`}>
+                        {transaction.type === "income" ? "+" : "-"}R$ {transaction.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                      <Badge
+                        variant={transaction.type === "income" ? "default" : "destructive"}
+                        className={`ml-2 px-2 py-0.5 text-xs rounded-full shadow-sm ${transaction.type === "income" ? "bg-[hsl(var(--income)/0.15)] text-[hsl(var(--income))] dark:bg-[hsl(var(--income)/0.15)] dark:text-[hsl(var(--income))]" : "bg-[hsl(var(--expense)/0.15)] text-[hsl(var(--expense))] dark:bg-[hsl(var(--expense)/0.15)] dark:text-[hsl(var(--expense))]"}`}
+                      >
+                        {transaction.type === "income" ? "Receita" : "Despesa"}
+                      </Badge>
+                    </div>
+                    <div className="mt-2">
+                      <p className="font-medium text-base text-black dark:text-white">{transaction.description}</p>
+                      <span className="text-xs text-gray-500 dark:text-[#bbbbbb]">{new Date(transaction.date).toLocaleDateString("pt-BR")}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center space-x-4 w-full sm:w-auto">
-                    <div className="text-right flex-1 sm:flex-none">
-                      <p
-                        className={`font-semibold text-lg ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {transaction.type === "income" ? "+" : "-"}R${" "}
-                        {transaction.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-gray-400 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-black dark:text-foreground">Confirmar exclusão</AlertDialogTitle>
-                            <AlertDialogDescription className="text-black dark:text-foreground">
-                              Tem certeza que deseja excluir esta transação? Essa ação não poderá ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="text-black dark:text-foreground">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(transaction.id)} className="bg-red-600 hover:bg-red-700">Excluir</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+                  {/* Direita: Botões de ação */}
+                  <div className="flex flex-col gap-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-400 hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--primary)/0.1)] dark:hover:text-[hsl(var(--primary))] dark:hover:bg-[hsl(var(--primary)/0.15)]"
+                      onClick={() => handleEdit(transaction.id)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-[hsl(var(--expense))] hover:bg-[hsl(var(--expense)/0.1)] dark:hover:text-[hsl(var(--expense))] dark:hover:bg-[hsl(var(--expense)/0.15)]"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-black dark:text-white">Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription className="text-black dark:text-[#bbbbbb]">
+                            Tem certeza que deseja excluir esta transação? Essa ação não poderá ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="text-black dark:text-white">Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(transaction.id)} className="bg-[hsl(var(--expense))] hover:bg-[hsl(var(--expense)/0.85)] text-white">Excluir</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}
@@ -294,6 +334,28 @@ export default function TransactionsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Edição de Transação */}
+      <AlertDialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <AlertDialogContent className="max-w-lg w-full p-0">
+          {editLoading || !editTransaction ? (
+            <div className="p-8">Carregando...</div>
+          ) : (
+            <TransactionForm
+              initialData={editTransaction}
+              onSuccess={() => {
+                setIsEditModalOpen(false)
+                setEditTransaction(null)
+                refreshTransactions()
+              }}
+              onCancel={() => {
+                setIsEditModalOpen(false)
+                setEditTransaction(null)
+              }}
+            />
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

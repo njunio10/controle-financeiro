@@ -10,6 +10,7 @@ import { TrendingUp, TrendingDown, DollarSign, Plus, List, LogOut, Sun, Moon } f
 import Link from "next/link"
 import { getTransactions } from '@/lib/transactionsApi'
 import { useTheme } from "next-themes"
+import { useEffect as useReactEffect, useState as useReactState } from "react"
 
 interface Transaction {
   id: string
@@ -44,6 +45,7 @@ export default function Dashboard() {
   const [userEmail, setUserEmail] = useState("")
   const router = useRouter()
   const { theme, setTheme } = useTheme();
+  const [isMobile, setIsMobile] = useReactState(false)
 
   // Função para limpar dados antigos que contêm categorias
   const cleanOldData = (oldTransactions: any[]): Transaction[] => {
@@ -56,6 +58,13 @@ export default function Dashboard() {
       // Remove a propriedade category se existir
     }))
   }
+
+  useReactEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     // Verificar autenticação
@@ -126,45 +135,51 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-16 py-4 sm:py-0 gap-4 sm:gap-0">
-            <div className="flex items-center">
+          <div className="flex flex-row justify-between items-center h-auto sm:h-16 py-4 sm:py-0 gap-4 sm:gap-0 w-full">
+            {/* Esquerda: Logo e saudação */}
+            <div className="flex items-center min-w-0">
               <DollarSign className="h-8 w-8 text-primary mr-2" />
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">Controle Financeiro</h1>
+              <div className="truncate">
+                <h1 className="text-xl font-semibold text-foreground truncate">
+                  <span className="inline sm:hidden">Financeiro</span>
+                  <span className="hidden sm:inline">Controle Financeiro</span>
+                </h1>
                 {userEmail && (
-                  <p className="text-sm text-foreground flex items-center gap-2">
-                    Olá, Natan Junio !
+                  <p className="text-sm text-foreground flex items-center gap-2 truncate">
+                    {userEmail === "natanaelfinanceiro@gmail.com"
+                      ? "Olá, Natan Junio!"
+                      : userEmail === "karem.6@gmail.com"
+                      ? "Olá, Karem Cristina!"
+                      : userEmail === "teste@gmail.com"
+                      ? "Olá, Teste!"
+                      : null}
+                      
                     <button
                       aria-label="Alternar tema"
                       className="ml-2 p-1 rounded hover:bg-muted transition-colors"
                       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     >
                       {theme === "dark" ? (
-                        <Sun className="h-5 w-5 text-yellow-400" />
+                        <Moon className="h-5 w-5 text-zinc-100" />
                       ) : (
-                        <Moon className="h-5 w-5 text-zinc-800" />
+                        <Sun className="h-5 w-5 text-yellow-400" />
                       )}
                     </button>
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-              <Link href="/dashboard/add-transaction">
-                <Button size="sm" className="w-full sm:w-auto">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Transação
-                </Button>
-              </Link>
+            {/* Direita: Botões */}
+            <div className="flex flex-row items-center space-x-2 sm:space-x-4 ml-auto">
               <Link href="/dashboard/transactions">
                 <Button variant="outline" size="sm" className="w-full sm:w-auto text-black dark:text-foreground">
                   <List className="h-4 w-4 mr-2" />
                   Transações
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full sm:w-auto text-black dark:text-foreground">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="w-full sm:w-auto text-black dark:text-foreground flex items-center justify-center">
+                <LogOut className="h-4 w-4 mr-0 sm:mr-2" />
+                <span className="hidden sm:inline">Sair</span>
               </Button>
             </div>
           </div>
@@ -206,10 +221,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Receitas</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-[hsl(var(--income))]" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-green-600">
+              <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--income))]">
                 R$ {totalIncome.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </div>
             </CardContent>
@@ -218,10 +233,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Despesas</CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-600" />
+              <TrendingDown className="h-4 w-4 text-[hsl(var(--expense))]" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-red-600">
+              <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--expense))]">
                 R$ {totalExpenses.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </div>
             </CardContent>
@@ -230,10 +245,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-              <DollarSign className={`h-4 w-4 ${balance >= 0 ? "text-green-600" : "text-red-600"}`} />
+              <DollarSign className={`h-4 w-4 ${balance >= 0 ? "text-[hsl(var(--income))]" : "text-[hsl(var(--expense))]"}`} />
             </CardHeader>
             <CardContent>
-              <div className={`text-xl sm:text-2xl font-bold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <div className={`text-xl sm:text-2xl font-bold ${balance >= 0 ? "text-[hsl(var(--income))]" : "text-[hsl(var(--expense))]"}`}>
                 R$ {balance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </div>
             </CardContent>
@@ -242,10 +257,10 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Transações</CardTitle>
-              <List className="h-4 w-4 text-blue-600" />
+              <List className="h-4 w-4 text-[hsl(var(--primary))]" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-blue-600">{filteredTransactions.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-[hsl(var(--primary))]">{filteredTransactions.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -260,45 +275,62 @@ export default function Dashboard() {
                 Distribuição do mês de {months[selectedMonth]} {selectedYear}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: R$ ${value?.toLocaleString("pt-BR") || "0"}`}
-                    outerRadius={90}
-                    innerRadius={50}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={3} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="bg-zinc-900 text-white rounded-lg px-4 py-2 shadow-lg border border-zinc-700">
-                            <div className="font-semibold mb-1">Resumo</div>
-                            {payload.map((entry, idx) => (
-                              <div key={idx} className="flex items-center gap-2">
-                                <span style={{ width: 12, height: 12, borderRadius: 6, background: entry.color, display: 'inline-block' }}></span>
-                                <span>{entry.name}:</span>
-                                <span className="font-bold ml-1">R$ {Number(entry.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      }
-                      return null
-                    }}
-                  />
-                  <CustomLegend />
-                </PieChart>
-              </ResponsiveContainer>
+            <CardContent className="overflow-x-auto">
+              <div className="min-w-[320px]">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={isMobile ? false : ({ name, value }) => `${name}: R$ ${value?.toLocaleString("pt-BR") || "0"}`}
+                      outerRadius={90}
+                      innerRadius={50}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="#fff" strokeWidth={3} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-zinc-900 text-white rounded-lg px-4 py-2 shadow-lg border border-zinc-700">
+                              <div className="font-semibold mb-1">Resumo</div>
+                              {payload.map((entry, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <span style={{ width: 12, height: 12, borderRadius: 6, background: entry.color, display: 'inline-block' }}></span>
+                                  <span>{entry.name}:</span>
+                                  <span className="font-bold ml-1">R$ {Number(entry.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )
+                        }
+                        return null
+                      }}
+                    />
+                    <CustomLegend />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Resumo mobile */}
+                {isMobile && (
+                  <div className="flex flex-col items-center gap-2 mt-4 sm:hidden">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 rounded-full" style={{ background: COLORS.income }}></span>
+                      <span className="font-medium">Receitas:</span>
+                      <span className="font-bold text-[hsl(var(--income))]">R$ {totalIncome.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 rounded-full" style={{ background: COLORS.expense }}></span>
+                      <span className="font-medium">Despesas:</span>
+                      <span className="font-bold text-[hsl(var(--expense))]">R$ {totalExpenses.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -368,20 +400,19 @@ export default function Dashboard() {
                 filteredTransactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-4 flex-1 min-w-0">
-                      <div
-                        className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                          transaction.type === "income" ? "bg-green-500" : "bg-red-500"
-                        }`}
-                      />
+                      {transaction.type === "income" ? (
+                        <TrendingUp className="h-5 w-5 text-[hsl(var(--income))]" />
+                      ) : (
+                        <TrendingDown className="h-5 w-5 text-[hsl(var(--expense))]" />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{transaction.description}</p>
                         <p className="text-sm text-foreground">{new Date(transaction.date).toLocaleDateString("pt-BR")}</p>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className={`font-semibold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                        {transaction.type === "income" ? "+" : "-"}R${" "}
-                        {transaction.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      <p className={`font-semibold ${transaction.type === "income" ? "text-[hsl(var(--income))]" : "text-[hsl(var(--expense))]"}`}>
+                        {transaction.type === "income" ? "+" : "-"}R$ {transaction.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>

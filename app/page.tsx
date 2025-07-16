@@ -26,7 +26,8 @@ export default function LoginPage() {
     // Verificar credenciais
     if (
       (email === "natanaelfinanceiro@gmail.com" && password === "financeirorei10") ||
-      (email === "teste@gmail.com" && password === "teste123")
+      (email === "teste@gmail.com" && password === "teste123") ||
+      (email === "karem.6@gmail.com" && password === "karencristina12")
     ) {
       // Simular delay de login
       setTimeout(() => {
@@ -91,7 +92,7 @@ export default function LoginPage() {
             </div>
             
             {error && (
-              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+              <div className="text-[hsl(var(--expense))] text-sm text-center bg-[hsl(var(--expense)/0.15)] p-3 rounded-lg dark:text-[hsl(var(--expense))] dark:bg-[hsl(var(--expense)/0.15)]">
                 {error}
               </div>
             )}

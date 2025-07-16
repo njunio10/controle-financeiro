@@ -10,7 +10,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 192 100% 30%; /* Azul petróleo */
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -23,29 +23,33 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
+    --income: 152 72% 40%; /* Verde esmeralda */
+    --expense: 0 84% 60%; /* Vermelho suave */
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 0 0% 100%; /* #fff */
+    --card: 0 0% 12%; /* #1e1e1e */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 192 100% 30%; /* Azul petróleo */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%; /* #232323 */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 73%; /* #bbbbbb */
+    --accent: 192 100% 30%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%; /* Vermelho suave */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%; /* #333 */
+    --input: 0 0% 20%;
+    --ring: 192 100% 30%;
+    --income: 152 72% 40%; /* Verde esmeralda */
+    --expense: 0 84% 60%; /* Vermelho suave */
   }
 }
 
@@ -55,45 +59,45 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #111113;
-    color: #f4f4f5;
+    background-color: #fff;
+    color: #222;
   }
   .dark body {
-    background-color: #111113;
-    color: #f4f4f5;
+    background-color: #121212;
+    color: #fff;
   }
   .dark .bg-white {
-    background-color: #18181b !important;
+    background-color: #1e1e1e !important;
   }
   .dark .bg-gray-50 {
-    background-color: #111113 !important;
+    background-color: #121212 !important;
   }
   .dark .border-b, .dark .border, .dark .border-gray-200 {
-    border-color: #23232a !important;
+    border-color: #333 !important;
   }
   .dark .text-gray-600, .dark .text-gray-500 {
-    color: #e4e4e7 !important;
+    color: #bbbbbb !important;
   }
   .dark .card-mobile, .dark .bg-white, .dark .bg-gray-50 {
-    background-color: #18181b !important;
-    color: #f4f4f5 !important;
+    background-color: #1e1e1e !important;
+    color: #fff !important;
   }
   .dark .shadow-sm, .dark .shadow-lg {
     box-shadow: 0 2px 8px 0 #00000066 !important;
   }
   .dark .recharts-tooltip-wrapper {
     background: #23232a !important;
-    color: #f4f4f5 !important;
+    color: #fff !important;
     border: 1px solid #23232a !important;
     border-radius: 8px !important;
   }
   .dark .recharts-default-tooltip {
     background: #23232a !important;
-    color: #f4f4f5 !important;
+    color: #fff !important;
     border: none !important;
   }
   .dark .recharts-legend-item-text {
-    color: #e4e4e7 !important;
+    color: #bbbbbb !important;
   }
 }
 
